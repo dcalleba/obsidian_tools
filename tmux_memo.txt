@@ -5,4 +5,3 @@ tmux source-file ~/.tmux.conf
 zed tmux_memo.txt
 zed python_memo.txt
 zed /Users/danielcallebaut/.config/tmuxinator/obsidian.yml
-Hello
