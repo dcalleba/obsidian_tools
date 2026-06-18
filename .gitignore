@@ -1,4 +1,6 @@
 .venv/
+.vscode
+.gitignore
 .DS_Store
 __pycache__/
 *.py[cod]
