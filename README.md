@@ -45,6 +45,17 @@ Avec `OBSIDIAN_VAULT_PATH` renseigné, le chemin du vault devient optionnel :
 uv run obsidian-media-tool summary
 ```
 
+Retirer les marqueurs de surlignage `==...==` de toutes les notes Markdown
+d'un dossier, en conservant le texte surligné :
+
+```bash
+uv run obsidian-remove-comments /chemin/vers/dossier --dry-run
+uv run obsidian-remove-comments /chemin/vers/dossier
+```
+
+Le parcours est récursif et ignore les dossiers cachés, notamment `.obsidian`.
+Avec `OBSIDIAN_VAULT_PATH` renseigné, le chemin peut être omis.
+
 Compter les notes Markdown sans lire leur contenu :
 
 ```bash

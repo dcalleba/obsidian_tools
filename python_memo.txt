@@ -1,0 +1,17 @@
+===== SYSTEM =====
+python --version
+uv --version
+uv run python --version
+===== PYTHON =====
+uv run pytest
+uv run pytest -f
+uv run ruff check .
+uv run ty check .
+===== PRODUCTION =====
+uv run obsidian_comment_tool.py --dry-run
+uv run obsidian_comment_tool.py "/Users/danielcallebaut/OBSI_COCKPIT" --dry-run
+uv run obsidian_comment_tool.py "/Users/danielcallebaut/OBSI_COCKPIT"
+uv run obsidian_comment_tool.py "/Users/danielcallebaut/Desktop/Obsinew" --dry-run
+uv run obsidian_comment_tool.py "/Users/danielcallebaut/Desktop/Obsinew"
+uv run obsidian_comment_tool.py --help
+uv run obsidian_media_tool.py --help

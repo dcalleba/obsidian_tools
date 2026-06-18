@@ -10,10 +10,11 @@ dependencies = [
 
 [project.scripts]
 obsidian-media-tool = "obsidian_media_tool:main"
+obsidian-remove-comments = "obsidian_comment_tool:main"
 
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-py-modules = ["obsidian_media_tool"]
+py-modules = ["obsidian_media_tool", "obsidian_comment_tool"]
