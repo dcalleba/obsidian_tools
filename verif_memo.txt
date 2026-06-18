@@ -1,0 +1,11 @@
+===== VERIF =====
+===== SYSTEM =====
+python --version
+uv --version
+uv run python --version
+===== PYTHON =====
+uv run pytest
+uv run pytest -f
+uv run ty check .
+uv run ruff check --fix .
+uv run ruff format .

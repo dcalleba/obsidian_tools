@@ -46,17 +46,49 @@ except ImportError:  # pragma: no cover - module absent on Windows
 
 
 DEFAULT_MEDIA_EXTENSIONS = {
-    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".tif", ".tiff",
-    ".pdf", ".mp3", ".wav", ".ogg", ".m4a", ".flac",
-    ".mp4", ".mov", ".avi", ".mkv", ".webm",
-    ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
-    ".zip", ".7z", ".rar",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".bmp",
+    ".tif",
+    ".tiff",
+    ".pdf",
+    ".mp3",
+    ".wav",
+    ".ogg",
+    ".m4a",
+    ".flac",
+    ".mp4",
+    ".mov",
+    ".avi",
+    ".mkv",
+    ".webm",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".zip",
+    ".7z",
+    ".rar",
 }
 
 SUPPORT_FILE_EXTENSIONS = {".base"}
 
 IMAGE_EXTENSIONS = {
-    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".bmp", ".tif", ".tiff",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".bmp",
+    ".tif",
+    ".tiff",
 }
 
 WIKILINK_RE = re.compile(r"!?\[\[([^\]]+)\]\]")
@@ -83,11 +115,19 @@ COMMAND_NAMES = {
 NO_VAULT_COMMAND_NAMES = {"terminal-dashboard", "terminal-history"}
 
 ZSH_HISTORY_RE = re.compile(r"^: (?P<timestamp>\d+):(?P<duration>\d+);(?P<command>.*)$")
-ABSOLUTE_PATH_RE = re.compile(r"(?P<path>/(?:Users|private|tmp|var|Volumes)/[^\s'\"`;|&<>]+)")
+ABSOLUTE_PATH_RE = re.compile(
+    r"(?P<path>/(?:Users|private|tmp|var|Volumes)/[^\s'\"`;|&<>]+)"
+)
 PROJECT_ROOT = Path(__file__).resolve().parent
-DEFAULT_TERMINAL_DASHBOARD_OUTPUT = PROJECT_ROOT / "diagnostics" / "terminal_dashboard.md"
-DEFAULT_TERMINAL_IGNORE_FILE = PROJECT_ROOT / "diagnostics" / "terminal_history_ignored.json"
-DEFAULT_TERMINAL_COMMAND_LINK_DIR = PROJECT_ROOT / "diagnostics" / "terminal_command_links"
+DEFAULT_TERMINAL_DASHBOARD_OUTPUT = (
+    PROJECT_ROOT / "diagnostics" / "terminal_dashboard.md"
+)
+DEFAULT_TERMINAL_IGNORE_FILE = (
+    PROJECT_ROOT / "diagnostics" / "terminal_history_ignored.json"
+)
+DEFAULT_TERMINAL_COMMAND_LINK_DIR = (
+    PROJECT_ROOT / "diagnostics" / "terminal_command_links"
+)
 TERMINAL_COMMAND_RUNNER_NAME = "run_terminal_command.command"
 TERMINAL_COMMAND_REGISTRY_NAME = "terminal_command_registry.json"
 
@@ -142,10 +182,7 @@ def iter_files(vault_root: Path) -> Iterable[Path]:
     for root, dirs, files in os.walk(vault_root):
         root_path = Path(root)
 
-        dirs[:] = [
-            d for d in dirs
-            if not d.startswith(".") and d != ".obsidian"
-        ]
+        dirs[:] = [d for d in dirs if not d.startswith(".") and d != ".obsidian"]
 
         for filename in files:
             path = root_path / filename
@@ -210,7 +247,9 @@ def read_text_lossy(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
-def extract_frontmatter_references(note: Path, text: str, media_extensions: set[str]) -> list[Reference]:
+def extract_frontmatter_references(
+    note: Path, text: str, media_extensions: set[str]
+) -> list[Reference]:
     """
     Extraction volontairement simple des références de médias dans le frontmatter YAML.
     Elle couvre les cas courants : cover, image, attachment, attachments, banner, cssclasses, etc.
@@ -238,7 +277,9 @@ def extract_frontmatter_references(note: Path, text: str, media_extensions: set[
     return refs
 
 
-def extract_references(note: Path, text: str, media_extensions: set[str]) -> list[Reference]:
+def extract_references(
+    note: Path, text: str, media_extensions: set[str]
+) -> list[Reference]:
     refs: list[Reference] = []
 
     for match in WIKILINK_RE.finditer(text):
@@ -303,7 +344,9 @@ def build_media_index(media_files: Sequence[Path]) -> dict[str, list[Path]]:
     return dict(by_name)
 
 
-def resolve_reference(vault_root: Path, ref: Reference, media_by_name: dict[str, list[Path]]) -> ResolvedReference:
+def resolve_reference(
+    vault_root: Path, ref: Reference, media_by_name: dict[str, list[Path]]
+) -> ResolvedReference:
     target = ref.normalized_target
 
     if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", target):
@@ -320,12 +363,16 @@ def resolve_reference(vault_root: Path, ref: Reference, media_by_name: dict[str,
     # 2. Chemin relatif à la note
     relative_to_note = (ref.source_note.parent / target_path).resolve()
     if relative_to_note.exists():
-        return ResolvedReference(ref, relative_to_note, (relative_to_note,), "resolved-relative-to-note")
+        return ResolvedReference(
+            ref, relative_to_note, (relative_to_note,), "resolved-relative-to-note"
+        )
 
     # 3. Chemin relatif à la racine du vault
     relative_to_vault = (vault_root / target_path).resolve()
     if relative_to_vault.exists():
-        return ResolvedReference(ref, relative_to_vault, (relative_to_vault,), "resolved-relative-to-vault")
+        return ResolvedReference(
+            ref, relative_to_vault, (relative_to_vault,), "resolved-relative-to-vault"
+        )
 
     # 4. Résolution Obsidian par nom de fichier
     basename = target_path.name
@@ -339,7 +386,9 @@ def resolve_reference(vault_root: Path, ref: Reference, media_by_name: dict[str,
     )
 
     if len(candidates) == 1:
-        return ResolvedReference(ref, candidates[0], tuple(candidates), "resolved-by-name")
+        return ResolvedReference(
+            ref, candidates[0], tuple(candidates), "resolved-by-name"
+        )
 
     if len(candidates) > 1:
         # Heuristique : choisir le fichier le plus proche en nombre de segments communs.
@@ -352,7 +401,9 @@ def resolve_reference(vault_root: Path, ref: Reference, media_by_name: dict[str,
             return common, -distance
 
         best = sorted(candidates, key=score, reverse=True)[0]
-        return ResolvedReference(ref, best, tuple(candidates), "ambiguous-chosen-nearest")
+        return ResolvedReference(
+            ref, best, tuple(candidates), "ambiguous-chosen-nearest"
+        )
 
     return ResolvedReference(ref, None, (), "missing")
 
@@ -443,7 +494,9 @@ def write_report(index: VaultIndex, output: Path) -> None:
                     "target": item.reference.normalized_target,
                     "kind": item.reference.kind,
                     "status": item.status,
-                    "resolved": rel(item.resolved_path, index.vault_root) if item.resolved_path else None,
+                    "resolved": rel(item.resolved_path, index.vault_root)
+                    if item.resolved_path
+                    else None,
                     "candidates": [rel(c, index.vault_root) for c in item.candidates],
                 }
             )
@@ -463,7 +516,9 @@ def write_report(index: VaultIndex, output: Path) -> None:
         "notes": notes_payload,
     }
 
-    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    output.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 def find_note(index: VaultIndex, query: str) -> Path:
@@ -595,7 +650,9 @@ def rewrite_note_links_for_export(
     for item in resolved_items:
         if item.resolved_path is None:
             continue
-        by_kind_and_target[(item.reference.kind, item.reference.normalized_target)] = item
+        by_kind_and_target[(item.reference.kind, item.reference.normalized_target)] = (
+            item
+        )
 
     rewrite_count = 0
 
@@ -614,7 +671,11 @@ def rewrite_note_links_for_export(
             return match.group(0)
 
         rewrite_count += 1
-        return universal_media_link(item.resolved_path, relative_url_for(item), force_embed=item.reference.is_embed)
+        return universal_media_link(
+            item.resolved_path,
+            relative_url_for(item),
+            force_embed=item.reference.is_embed,
+        )
 
     def markdown_replacer(match: re.Match[str]) -> str:
         nonlocal rewrite_count
@@ -630,8 +691,12 @@ def rewrite_note_links_for_export(
 
         rewrite_count += 1
         if is_embed or is_image_path(item.resolved_path):
-            return universal_media_link(item.resolved_path, relative_url_for(item), force_embed=True)
-        return universal_media_link(item.resolved_path, relative_url_for(item), label=label)
+            return universal_media_link(
+                item.resolved_path, relative_url_for(item), force_embed=True
+            )
+        return universal_media_link(
+            item.resolved_path, relative_url_for(item), label=label
+        )
 
     def html_img_replacer(match: re.Match[str]) -> str:
         nonlocal rewrite_count
@@ -642,7 +707,9 @@ def rewrite_note_links_for_export(
             return match.group(0)
 
         rewrite_count += 1
-        return universal_media_link(item.resolved_path, relative_url_for(item), force_embed=True)
+        return universal_media_link(
+            item.resolved_path, relative_url_for(item), force_embed=True
+        )
 
     rewritten = WIKILINK_RE.sub(wikilink_replacer, text)
     rewritten = MARKDOWN_LINK_RE.sub(markdown_replacer, rewritten)
@@ -666,11 +733,17 @@ def export_note_with_media(
     if dry_run:
         print("Simulation active : aucune copie ne sera effectuée.")
     if rewrite_links:
-        print("Réécriture active : les liens de la copie seront convertis en Markdown universel.")
+        print(
+            "Réécriture active : les liens de la copie seront convertis en Markdown universel."
+        )
     if portable_media_names:
-        print("Noms médias portables : les médias copiés seront renommés en ASCII dans _media/.")
+        print(
+            "Noms médias portables : les médias copiés seront renommés en ASCII dans _media/."
+        )
     if overwrite:
-        print("Écrasement actif : les fichiers existants dans la sortie pourront être remplacés.")
+        print(
+            "Écrasement actif : les fichiers existants dans la sortie pourront être remplacés."
+        )
     print()
 
     note_dest = output_dir / rel(note, index.vault_root)
@@ -684,14 +757,20 @@ def export_note_with_media(
 
     for item in resolved_items:
         if item.resolved_path is None:
-            print(f"WARN unresolved {item.status}: {rel(note, index.vault_root)} -> {item.reference.raw}")
+            print(
+                f"WARN unresolved {item.status}: {rel(note, index.vault_root)} -> {item.reference.raw}"
+            )
             continue
 
         src = item.resolved_path.resolve()
         if is_image_path(src) and detect_media_suffix(src) is None:
-            print(f"WARN media illisible ou format non reconnu : {rel(src, index.vault_root)}")
+            print(
+                f"WARN media illisible ou format non reconnu : {rel(src, index.vault_root)}"
+            )
 
-        media_dest = export_media_destination(src, output_dir, index.vault_root, note_dest, portable_media_names)
+        media_dest = export_media_destination(
+            src, output_dir, index.vault_root, note_dest, portable_media_names
+        )
         media_dest_by_src[src] = media_dest
 
         if src in handled:
@@ -707,7 +786,9 @@ def export_note_with_media(
         if dry_run:
             print(f"DRY-RUN rewrite links in {note_dest}")
         elif not note_copied:
-            print(f"SKIP rewrite links in existing note without --overwrite: {note_dest}")
+            print(
+                f"SKIP rewrite links in existing note without --overwrite: {note_dest}"
+            )
         else:
             original_text = read_text_lossy(note)
             rewritten_text, rewrite_count = rewrite_note_links_for_export(
@@ -739,11 +820,7 @@ def find_notes_in_folder(index: VaultIndex, folder_query: str) -> list[Path]:
     if not folder.exists() or not folder.is_dir():
         raise FileNotFoundError(f"Dossier introuvable dans le vault : {folder_query}")
 
-    return [
-        note
-        for note in index.notes
-        if note == folder or folder in note.parents
-    ]
+    return [note for note in index.notes if note == folder or folder in note.parents]
 
 
 def find_support_files_in_folder(index: VaultIndex, folder_query: str) -> list[Path]:
@@ -785,20 +862,32 @@ def export_folder_notes(
 ) -> None:
     notes = find_notes_in_folder(index, folder_query)
     support_files = find_support_files_in_folder(index, folder_query)
-    valid_notes = [note for note in notes if not note_has_blocking_media_references(index, note)]
-    blocked_notes = [note for note in notes if note_has_blocking_media_references(index, note)]
+    valid_notes = [
+        note for note in notes if not note_has_blocking_media_references(index, note)
+    ]
+    blocked_notes = [
+        note for note in notes if note_has_blocking_media_references(index, note)
+    ]
 
     selected_notes = notes if include_blocked else valid_notes
 
-    print("Export de dossier en mode copie : les fichiers sources ne sont pas modifiés.")
+    print(
+        "Export de dossier en mode copie : les fichiers sources ne sont pas modifiés."
+    )
     if dry_run:
         print("Simulation active : aucune copie ne sera effectuée.")
     if rewrite_links:
-        print("Réécriture active : les liens des copies seront convertis en Markdown universel.")
+        print(
+            "Réécriture active : les liens des copies seront convertis en Markdown universel."
+        )
     if portable_media_names:
-        print("Noms médias portables : les médias copiés seront renommés en ASCII dans _media/.")
+        print(
+            "Noms médias portables : les médias copiés seront renommés en ASCII dans _media/."
+        )
     if overwrite:
-        print("Écrasement actif : les fichiers existants dans la sortie pourront être remplacés.")
+        print(
+            "Écrasement actif : les fichiers existants dans la sortie pourront être remplacés."
+        )
     print()
     print(f"Dossier source : {folder_query}")
     print(f"Notes trouvées : {len(notes)}")
@@ -899,7 +988,9 @@ def list_missing(index: VaultIndex, limit: int | None) -> None:
     ]
 
     for item in items[:limit]:
-        print(f"{rel(item.reference.source_note, index.vault_root)} -> {item.reference.raw}")
+        print(
+            f"{rel(item.reference.source_note, index.vault_root)} -> {item.reference.raw}"
+        )
 
     if limit is not None and len(items) > limit:
         print(f"... {len(items) - limit} autres références manquantes")
@@ -954,14 +1045,18 @@ def build_diagnosis(index: VaultIndex, limit: int | None) -> dict[str, object]:
         if item.resolved_path is not None and is_invalid_media_path(item.resolved_path)
     ]
 
-    missing_by_folder = Counter(top_folder(item.reference.source_note, index.vault_root) for item in missing)
+    missing_by_folder = Counter(
+        top_folder(item.reference.source_note, index.vault_root) for item in missing
+    )
     missing_by_kind = Counter(item.reference.kind for item in missing)
     missing_by_category = Counter(
         classify_missing_target(item.reference.normalized_target, item.reference.raw)
         for item in missing
     )
     orphan_by_folder = Counter(
-        rel(path, index.vault_root).split("/", 1)[0] if "/" in rel(path, index.vault_root) else "(racine)"
+        rel(path, index.vault_root).split("/", 1)[0]
+        if "/" in rel(path, index.vault_root)
+        else "(racine)"
         for path in orphan
     )
 
@@ -988,7 +1083,9 @@ def build_diagnosis(index: VaultIndex, limit: int | None) -> dict[str, object]:
                 "raw": item.reference.raw,
                 "target": item.reference.normalized_target,
                 "kind": item.reference.kind,
-                "category": classify_missing_target(item.reference.normalized_target, item.reference.raw),
+                "category": classify_missing_target(
+                    item.reference.normalized_target, item.reference.raw
+                ),
             }
             for item in missing[:sample_limit]
         ],
@@ -998,7 +1095,9 @@ def build_diagnosis(index: VaultIndex, limit: int | None) -> dict[str, object]:
                 "raw": item.reference.raw,
                 "target": item.reference.normalized_target,
                 "kind": item.reference.kind,
-                "category": classify_missing_target(item.reference.normalized_target, item.reference.raw),
+                "category": classify_missing_target(
+                    item.reference.normalized_target, item.reference.raw
+                ),
             }
             for item in missing
         ],
@@ -1007,7 +1106,9 @@ def build_diagnosis(index: VaultIndex, limit: int | None) -> dict[str, object]:
             {
                 "note": rel(item.reference.source_note, index.vault_root),
                 "raw": item.reference.raw,
-                "resolved": rel(item.resolved_path, index.vault_root) if item.resolved_path else None,
+                "resolved": rel(item.resolved_path, index.vault_root)
+                if item.resolved_path
+                else None,
             }
             for item in invalid_media
         ],
@@ -1016,8 +1117,12 @@ def build_diagnosis(index: VaultIndex, limit: int | None) -> dict[str, object]:
                 "note": rel(item.reference.source_note, index.vault_root),
                 "raw": item.reference.raw,
                 "target": item.reference.normalized_target,
-                "chosen": rel(item.resolved_path, index.vault_root) if item.resolved_path else None,
-                "candidates": [rel(candidate, index.vault_root) for candidate in item.candidates],
+                "chosen": rel(item.resolved_path, index.vault_root)
+                if item.resolved_path
+                else None,
+                "candidates": [
+                    rel(candidate, index.vault_root) for candidate in item.candidates
+                ],
             }
             for item in ambiguous[:sample_limit]
         ],
@@ -1026,8 +1131,12 @@ def build_diagnosis(index: VaultIndex, limit: int | None) -> dict[str, object]:
                 "note": rel(item.reference.source_note, index.vault_root),
                 "raw": item.reference.raw,
                 "target": item.reference.normalized_target,
-                "chosen": rel(item.resolved_path, index.vault_root) if item.resolved_path else None,
-                "candidates": [rel(candidate, index.vault_root) for candidate in item.candidates],
+                "chosen": rel(item.resolved_path, index.vault_root)
+                if item.resolved_path
+                else None,
+                "candidates": [
+                    rel(candidate, index.vault_root) for candidate in item.candidates
+                ],
             }
             for item in ambiguous
         ],
@@ -1061,9 +1170,13 @@ def diagnose(index: VaultIndex, output: Path | None, limit: int) -> None:
     print(f"Médias invalides     : {summary['invalid_media_references']}")
     print()
 
-    print_counter("Références manquantes par dossier", diagnosis["missing_by_folder"], 20)
+    print_counter(
+        "Références manquantes par dossier", diagnosis["missing_by_folder"], 20
+    )
     print_counter("Références manquantes par type", diagnosis["missing_by_kind"], 20)
-    print_counter("Références manquantes par catégorie", diagnosis["missing_by_category"], 20)
+    print_counter(
+        "Références manquantes par catégorie", diagnosis["missing_by_category"], 20
+    )
     print_counter("Médias orphelins par dossier", diagnosis["orphan_by_folder"], 20)
 
     print("Exemples de références manquantes")
@@ -1081,7 +1194,9 @@ def diagnose(index: VaultIndex, output: Path | None, limit: int) -> None:
     print()
 
     if output is not None:
-        output.write_text(json.dumps(diagnosis, ensure_ascii=False, indent=2), encoding="utf-8")
+        output.write_text(
+            json.dumps(diagnosis, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         print(f"Diagnostic JSON écrit : {output}")
 
 
@@ -1108,13 +1223,18 @@ def analyze_exportable_notes(index: VaultIndex) -> dict[str, list[dict[str, obje
     for note in index.notes:
         items = index.resolved_by_note.get(note, [])
         media_items = [item for item in items if item.status != "external"]
-        resolved_items = [item for item in media_items if item.resolved_path is not None]
+        resolved_items = [
+            item for item in media_items if item.resolved_path is not None
+        ]
         missing_items = [item for item in media_items if item.status == "missing"]
-        ambiguous_items = [item for item in media_items if item.status.startswith("ambiguous")]
+        ambiguous_items = [
+            item for item in media_items if item.status.startswith("ambiguous")
+        ]
         invalid_media_items = [
             item
             for item in resolved_items
-            if item.resolved_path is not None and is_invalid_media_path(item.resolved_path)
+            if item.resolved_path is not None
+            and is_invalid_media_path(item.resolved_path)
         ]
 
         payload = {
@@ -1149,11 +1269,14 @@ def blocked_note_details(index: VaultIndex) -> list[dict[str, object]]:
             if item.status != "external"
         ]
         missing_items = [item for item in items if item.status == "missing"]
-        ambiguous_items = [item for item in items if item.status.startswith("ambiguous")]
+        ambiguous_items = [
+            item for item in items if item.status.startswith("ambiguous")
+        ]
         invalid_media_items = [
             item
             for item in items
-            if item.resolved_path is not None and is_invalid_media_path(item.resolved_path)
+            if item.resolved_path is not None
+            and is_invalid_media_path(item.resolved_path)
         ]
 
         if not (missing_items or ambiguous_items or invalid_media_items):
@@ -1238,15 +1361,23 @@ def blocked_notes_markdown(index: VaultIndex) -> str:
             for ref in ambiguous_items:
                 lines.append(f"    - `{ref.reference.raw}`")
                 if ref.resolved_path is not None:
-                    lines.append(f"      - choix actuel : `{rel(ref.resolved_path, index.vault_root)}`")
+                    lines.append(
+                        f"      - choix actuel : `{rel(ref.resolved_path, index.vault_root)}`"
+                    )
                 for candidate in ref.candidates:
-                    lines.append(f"      - candidat : `{rel(candidate, index.vault_root)}`")
+                    lines.append(
+                        f"      - candidat : `{rel(candidate, index.vault_root)}`"
+                    )
 
         if invalid_items:
             lines.append("  - Médias invalides :")
             for ref in invalid_items:
                 resolved = ref.resolved_path
-                resolved_rel = rel(resolved, index.vault_root) if resolved is not None else "(introuvable)"
+                resolved_rel = (
+                    rel(resolved, index.vault_root)
+                    if resolved is not None
+                    else "(introuvable)"
+                )
                 lines.append(f"    - `{ref.reference.raw}` -> `{resolved_rel}`")
 
     if not blocked:
@@ -1272,7 +1403,10 @@ def exportable_notes_markdown(index: VaultIndex, limit: int | None = None) -> st
         "## Exportables avec médias",
         markdown_table(
             ("Médias", "Note"),
-            ((item["media_count"], item["note"]) for item in limited(exportable_with_media)),
+            (
+                (item["media_count"], item["note"])
+                for item in limited(exportable_with_media)
+            ),
         ),
         "",
         "## Exportables sans média",
@@ -1303,13 +1437,19 @@ def exportable_notes_markdown(index: VaultIndex, limit: int | None = None) -> st
     return "\n".join(sections)
 
 
-def write_exportable_notes_report(index: VaultIndex, output: Path, limit: int | None) -> None:
-    write_markdown_report(output, "Notes exportables", exportable_notes_markdown(index, limit))
+def write_exportable_notes_report(
+    index: VaultIndex, output: Path, limit: int | None
+) -> None:
+    write_markdown_report(
+        output, "Notes exportables", exportable_notes_markdown(index, limit)
+    )
     print(f"Liste des notes exportables écrite : {output}")
 
 
 def write_blocked_notes_report(index: VaultIndex, output: Path) -> None:
-    write_markdown_report(output, "Notes bloquées à corriger ou jeter", blocked_notes_markdown(index))
+    write_markdown_report(
+        output, "Notes bloquées à corriger ou jeter", blocked_notes_markdown(index)
+    )
     print(f"Liste des notes bloquées écrite : {output}")
 
 
@@ -1335,13 +1475,19 @@ def write_markdown_reports(index: VaultIndex, output_dir: Path, limit: int) -> N
                 f"- Références vers médias invalides : {summary['invalid_media_references']}",
                 "",
                 "## Références manquantes par dossier",
-                markdown_table(("Dossier", "Nombre"), diagnosis["missing_by_folder"].items()),
+                markdown_table(
+                    ("Dossier", "Nombre"), diagnosis["missing_by_folder"].items()
+                ),
                 "",
                 "## Références manquantes par catégorie",
-                markdown_table(("Catégorie", "Nombre"), diagnosis["missing_by_category"].items()),
+                markdown_table(
+                    ("Catégorie", "Nombre"), diagnosis["missing_by_category"].items()
+                ),
                 "",
                 "## Médias orphelins par dossier",
-                markdown_table(("Dossier", "Nombre"), diagnosis["orphan_by_folder"].items()),
+                markdown_table(
+                    ("Dossier", "Nombre"), diagnosis["orphan_by_folder"].items()
+                ),
             ]
         ),
     )
@@ -1361,7 +1507,9 @@ def write_markdown_reports(index: VaultIndex, output_dir: Path, limit: int) -> N
 
     grouped_missing_lines = []
     current_category = None
-    for item in sorted(missing_refs, key=lambda entry: (entry["category"], entry["note"], entry["raw"])):
+    for item in sorted(
+        missing_refs, key=lambda entry: (entry["category"], entry["note"], entry["raw"])
+    ):
         if item["category"] != current_category:
             current_category = item["category"]
             grouped_missing_lines.extend(["", f"## {current_category}", ""])
@@ -1417,22 +1565,23 @@ def write_markdown_reports(index: VaultIndex, output_dir: Path, limit: int) -> N
                 (item["note"], item["raw"], item["resolved"])
                 for item in invalid_media_refs
             ),
-        ) if invalid_media_refs else "Aucun média invalide détecté.",
+        )
+        if invalid_media_refs
+        else "Aucun média invalide détecté.",
     )
 
     suspicious = [
-        item for item in missing_refs
-        if item["category"] in {"chemin-parent-relatif", "chemin-point-relatif", "parentheses-suspectes"}
+        item
+        for item in missing_refs
+        if item["category"]
+        in {"chemin-parent-relatif", "chemin-point-relatif", "parentheses-suspectes"}
     ]
     write_markdown_report(
         output_dir / "05_chemins_suspects.md",
         "Chemins suspects",
         markdown_table(
             ("Catégorie", "Note", "Cible"),
-            (
-                (item["category"], item["note"], item["raw"])
-                for item in suspicious
-            ),
+            ((item["category"], item["note"], item["raw"]) for item in suspicious),
         ),
     )
 
@@ -1477,7 +1626,9 @@ def parse_history_line(line: str) -> tuple[dt.datetime | None, str] | None:
 
     match = ZSH_HISTORY_RE.match(line)
     if match:
-        timestamp = dt.datetime.fromtimestamp(int(match.group("timestamp"))).astimezone()
+        timestamp = dt.datetime.fromtimestamp(
+            int(match.group("timestamp"))
+        ).astimezone()
         command = match.group("command").strip()
         return timestamp, command
 
@@ -1505,8 +1656,22 @@ def is_history_noise(command: str) -> bool:
         return True
 
     if stripped.endswith("\\"):
-        first = Path(command_tokens(stripped)[0]).name if command_tokens(stripped) else ""
-        return first not in {"cd", "git", "uv", "python", "python3", "rg", "fd", "ls", "cat", "sed", "curl"}
+        first = (
+            Path(command_tokens(stripped)[0]).name if command_tokens(stripped) else ""
+        )
+        return first not in {
+            "cd",
+            "git",
+            "uv",
+            "python",
+            "python3",
+            "rg",
+            "fd",
+            "ls",
+            "cat",
+            "sed",
+            "curl",
+        }
 
     if re.match(r"^['\"]?[A-Za-z0-9_.-]+['\"]?\s*:", stripped):
         return True
@@ -1620,7 +1785,9 @@ def project_label_for_command(
     inferred_cwd: Path | None,
     project_roots: Sequence[Path],
 ) -> str:
-    candidates = command_path_hints(command) + ([inferred_cwd] if inferred_cwd is not None else [])
+    candidates = command_path_hints(command) + (
+        [inferred_cwd] if inferred_cwd is not None else []
+    )
     resolved_roots = [(root.resolve(), root.resolve().name) for root in project_roots]
 
     for candidate in candidates:
@@ -1696,7 +1863,9 @@ def fenced_commands(entries: Sequence[ShellCommandEntry]) -> str:
     return "```bash\n" + "\n".join(entry.command for entry in entries) + "\n```"
 
 
-def most_common_entries(entries: Sequence[ShellCommandEntry], top: int) -> list[tuple[str, int]]:
+def most_common_entries(
+    entries: Sequence[ShellCommandEntry], top: int
+) -> list[tuple[str, int]]:
     return Counter(entry.command for entry in entries).most_common(top)
 
 
@@ -1706,8 +1875,14 @@ def terminal_command_id(entry: ShellCommandEntry) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
-def effective_command_cwd(entry: ShellCommandEntry, project_roots: Sequence[Path]) -> Path | None:
-    inferred = entry.inferred_cwd.resolve() if entry.inferred_cwd is not None and entry.inferred_cwd.exists() else None
+def effective_command_cwd(
+    entry: ShellCommandEntry, project_roots: Sequence[Path]
+) -> Path | None:
+    inferred = (
+        entry.inferred_cwd.resolve()
+        if entry.inferred_cwd is not None and entry.inferred_cwd.exists()
+        else None
+    )
     roots = [root.resolve() for root in project_roots]
 
     for root in roots:
@@ -1720,14 +1895,18 @@ def effective_command_cwd(entry: ShellCommandEntry, project_roots: Sequence[Path
     return inferred
 
 
-def terminal_command_payload(entry: ShellCommandEntry, project_roots: Sequence[Path]) -> dict[str, str | None]:
+def terminal_command_payload(
+    entry: ShellCommandEntry, project_roots: Sequence[Path]
+) -> dict[str, str | None]:
     run_cwd = effective_command_cwd(entry, project_roots)
     return {
         "command": entry.command,
         "cwd": run_cwd.as_posix() if run_cwd is not None else None,
         "project": entry.project,
         "family": entry.family,
-        "timestamp": entry.timestamp.isoformat() if entry.timestamp is not None else None,
+        "timestamp": entry.timestamp.isoformat()
+        if entry.timestamp is not None
+        else None,
     }
 
 
@@ -1746,8 +1925,8 @@ def write_terminal_command_runner(launcher_dir: Path) -> Path:
         "set -e",
         "",
         f"REGISTRY={shlex.quote(registry.as_posix())}",
-        "if [[ ! -f \"$REGISTRY\" ]]; then",
-        "  echo \"Registre introuvable : $REGISTRY\"",
+        'if [[ ! -f "$REGISTRY" ]]; then',
+        '  echo "Registre introuvable : $REGISTRY"',
         "  read _",
         "  exit 1",
         "fi",
@@ -1755,12 +1934,12 @@ def write_terminal_command_runner(launcher_dir: Path) -> Path:
         "echo 'Identifiant de commande :'",
         "printf '> '",
         "read command_id",
-        "if [[ -z \"$command_id\" ]]; then",
+        'if [[ -z "$command_id" ]]; then',
         "  echo 'Annulé.'",
         "  exit 0",
         "fi",
         "",
-        "payload=$(python3 - \"$REGISTRY\" \"$command_id\" <<'PY'",
+        'payload=$(python3 - "$REGISTRY" "$command_id" <<\'PY\'',
         "import json, sys",
         "registry, command_id = sys.argv[1], sys.argv[2]",
         "with open(registry, encoding='utf-8') as fh:",
@@ -1771,29 +1950,29 @@ def write_terminal_command_runner(launcher_dir: Path) -> Path:
         "print(json.dumps(item, ensure_ascii=False))",
         "PY",
         ")",
-        "command=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])[\"command\"])' \"$payload\")",
-        "cwd=$(python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get(\"cwd\") or \"\")' \"$payload\")",
+        'command=$(python3 -c \'import json,sys; print(json.loads(sys.argv[1])["command"])\' "$payload")',
+        'cwd=$(python3 -c \'import json,sys; print(json.loads(sys.argv[1]).get("cwd") or "")\' "$payload")',
         "",
         "echo",
         "echo 'Commande sélectionnée :'",
         "printf '%s\\n' \"$command\"",
-        "if [[ -n \"$cwd\" ]]; then",
+        'if [[ -n "$cwd" ]]; then',
         "  echo",
-        "  echo \"Dossier : $cwd\"",
+        '  echo "Dossier : $cwd"',
         "fi",
         "",
         "echo",
         "printf 'Relancer cette commande ? taper oui pour confirmer : '",
         "read confirmation",
-        "if [[ \"$confirmation\" != \"oui\" ]]; then",
+        'if [[ "$confirmation" != "oui" ]]; then',
         "  echo 'Annulé.'",
         "  exit 0",
         "fi",
-        "if [[ -n \"$cwd\" ]]; then",
-        "  cd \"$cwd\"",
+        'if [[ -n "$cwd" ]]; then',
+        '  cd "$cwd"',
         "fi",
         "echo",
-        "eval \"$command\"",
+        'eval "$command"',
         "",
         "echo",
         "printf 'Terminé. Appuyer sur Entrée pour fermer.'",
@@ -1827,7 +2006,9 @@ def register_terminal_command(
         commands = {}
         payload["commands"] = commands
     commands[command_id] = terminal_command_payload(entry, project_roots)
-    registry.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    registry.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     return command_id, write_terminal_command_runner(launcher_dir)
 
@@ -1859,7 +2040,9 @@ def markdown_common_command_cell(
 
     for entry in reversed(entries):
         if entry.command == command:
-            return markdown_command_cell(entry, launcher_dir, markdown_base_dir, project_roots)
+            return markdown_command_cell(
+                entry, launcher_dir, markdown_base_dir, project_roots
+            )
     return f"`{command}`"
 
 
@@ -1875,7 +2058,8 @@ def shell_dashboard_markdown(
     now = dt.datetime.now().astimezone()
     dated_entries = [entry for entry in entries if entry.timestamp is not None]
     today_entries = [
-        entry for entry in dated_entries
+        entry
+        for entry in dated_entries
         if entry.timestamp is not None and entry.timestamp.date() == now.date()
     ]
     unique_entries = unique_latest_entries(entries)
@@ -1905,81 +2089,136 @@ def shell_dashboard_markdown(
     else:
         lines.append("- Aucune racine fournie.")
 
-    lines.extend([
-        "",
-        "## Commandes fréquentes",
-        "",
-        "_Cette section conserve volontairement les répétitions pour montrer les commandes les plus utilisées._",
-        "",
-        markdown_table(
-            ("Nombre", "Commande"),
-            (
-                (count, markdown_common_command_cell(command, entries, launcher_dir, markdown_base_dir, project_roots))
-                for command, count in most_common_entries(entries, top)
+    lines.extend(
+        [
+            "",
+            "## Commandes fréquentes",
+            "",
+            "_Cette section conserve volontairement les répétitions pour montrer les commandes les plus utilisées._",
+            "",
+            markdown_table(
+                ("Nombre", "Commande"),
+                (
+                    (
+                        count,
+                        markdown_common_command_cell(
+                            command,
+                            entries,
+                            launcher_dir,
+                            markdown_base_dir,
+                            project_roots,
+                        ),
+                    )
+                    for command, count in most_common_entries(entries, top)
+                ),
             ),
-        ),
-        "",
-        "## Familles de commandes",
-        "",
-        markdown_table(("Nombre", "Famille"), ((count, family) for family, count in family_counts.most_common(top))),
-        "",
-        "## Projets détectés",
-        "",
-        markdown_table(("Nombre", "Projet ou dossier"), ((count, project) for project, count in project_counts.most_common(top))),
-        "",
-        "## Aujourd'hui",
-        "",
-        markdown_table(
-            ("Date", "Projet", "Commande"),
-            (
-                (format_history_time(entry.timestamp), entry.project, markdown_command_cell(entry, launcher_dir, markdown_base_dir, project_roots))
-                for entry in reversed(unique_today_entries[-recent:])
+            "",
+            "## Familles de commandes",
+            "",
+            markdown_table(
+                ("Nombre", "Famille"),
+                ((count, family) for family, count in family_counts.most_common(top)),
             ),
-        ) if unique_today_entries else "_Aucune commande aujourd'hui._",
-        "",
-        "## Dernières commandes",
-        "",
-    ])
+            "",
+            "## Projets détectés",
+            "",
+            markdown_table(
+                ("Nombre", "Projet ou dossier"),
+                (
+                    (count, project)
+                    for project, count in project_counts.most_common(top)
+                ),
+            ),
+            "",
+            "## Aujourd'hui",
+            "",
+            markdown_table(
+                ("Date", "Projet", "Commande"),
+                (
+                    (
+                        format_history_time(entry.timestamp),
+                        entry.project,
+                        markdown_command_cell(
+                            entry, launcher_dir, markdown_base_dir, project_roots
+                        ),
+                    )
+                    for entry in reversed(unique_today_entries[-recent:])
+                ),
+            )
+            if unique_today_entries
+            else "_Aucune commande aujourd'hui._",
+            "",
+            "## Dernières commandes",
+            "",
+        ]
+    )
 
     if recent_entries:
-        lines.append(markdown_table(
-            ("Date", "Projet", "Famille", "Commande"),
-            (
-                (format_history_time(entry.timestamp), entry.project, entry.family, markdown_command_cell(entry, launcher_dir, markdown_base_dir, project_roots))
-                for entry in reversed(recent_entries)
-            ),
-        ))
+        lines.append(
+            markdown_table(
+                ("Date", "Projet", "Famille", "Commande"),
+                (
+                    (
+                        format_history_time(entry.timestamp),
+                        entry.project,
+                        entry.family,
+                        markdown_command_cell(
+                            entry, launcher_dir, markdown_base_dir, project_roots
+                        ),
+                    )
+                    for entry in reversed(recent_entries)
+                ),
+            )
+        )
     else:
         lines.append("_Aucune commande récente._")
 
     lines.extend(["", "## Cadres par projet", ""])
     for project, _count in project_counts.most_common(top):
-        project_entries = unique_latest_entries([entry for entry in entries if entry.project == project])
-        lines.extend([
-            f"### {project}",
-            "",
-            markdown_table(
-                ("Date", "Famille", "Commande"),
-                (
-                    (format_history_time(entry.timestamp), entry.family, markdown_command_cell(entry, launcher_dir, markdown_base_dir, project_roots))
-                    for entry in reversed(project_entries[-min(top, 10):])
+        project_entries = unique_latest_entries(
+            [entry for entry in entries if entry.project == project]
+        )
+        lines.extend(
+            [
+                f"### {project}",
+                "",
+                markdown_table(
+                    ("Date", "Famille", "Commande"),
+                    (
+                        (
+                            format_history_time(entry.timestamp),
+                            entry.family,
+                            markdown_command_cell(
+                                entry, launcher_dir, markdown_base_dir, project_roots
+                            ),
+                        )
+                        for entry in reversed(project_entries[-min(top, 10) :])
+                    ),
                 ),
-            ),
-            "",
-        ])
+                "",
+            ]
+        )
 
-    lines.extend([
-        "## Notes",
-        "",
-        "- Le dossier courant est inféré à partir des commandes `cd`; certains cadres peuvent donc être approximatifs.",
-        "- Ghostty affiche le terminal, mais les données viennent ici de l'historique du shell.",
-        "- Les lignes sans date n'ont pas été horodatées par `zsh`; leur date ne peut pas être retrouvée après coup.",
-    ])
+    lines.extend(
+        [
+            "## Notes",
+            "",
+            "- Le dossier courant est inféré à partir des commandes `cd`; certains cadres peuvent donc être approximatifs.",
+            "- Ghostty affiche le terminal, mais les données viennent ici de l'historique du shell.",
+            "- Les lignes sans date n'ont pas été horodatées par `zsh`; leur date ne peut pas être retrouvée après coup.",
+        ]
+    )
 
     if launcher_dir is not None:
-        lines.append(f"- Les liens ▶ pointent vers le lanceur unique `{launcher_dir / TERMINAL_COMMAND_RUNNER_NAME}`.")
-        lines.append(f"- Les commandes sont stockées dans `{launcher_dir / TERMINAL_COMMAND_REGISTRY_NAME}`.")
-        lines.append("- Le lanceur demande l'identifiant affiché dans le lien, puis confirmation avant exécution.")
+        lines.append(
+            f"- Les liens ▶ pointent vers le lanceur unique `{launcher_dir / TERMINAL_COMMAND_RUNNER_NAME}`."
+        )
+        lines.append(
+            f"- Les commandes sont stockées dans `{launcher_dir / TERMINAL_COMMAND_REGISTRY_NAME}`."
+        )
+        lines.append(
+            "- Le lanceur demande l'identifiant affiché dans le lien, puis confirmation avant exécution."
+        )
 
     return "\n".join(lines).rstrip() + "\n"
 
@@ -2003,7 +2242,9 @@ def write_terminal_dashboard(
     output.parent.mkdir(parents=True, exist_ok=True)
     actual_launcher_dir = None
     if launcher_dir is not None:
-        actual_launcher_dir = (launcher_dir if launcher_dir.is_absolute() else output.parent / launcher_dir).resolve()
+        actual_launcher_dir = (
+            launcher_dir if launcher_dir.is_absolute() else output.parent / launcher_dir
+        ).resolve()
     output.write_text(
         shell_dashboard_markdown(
             entries,
@@ -2038,7 +2279,9 @@ def terminal_history_matches(
     return matches
 
 
-def unique_latest_entries(entries: Sequence[ShellCommandEntry]) -> list[ShellCommandEntry]:
+def unique_latest_entries(
+    entries: Sequence[ShellCommandEntry],
+) -> list[ShellCommandEntry]:
     by_command: dict[str, ShellCommandEntry] = {}
     for entry in entries:
         by_command[entry.command] = entry
@@ -2070,7 +2313,9 @@ def save_ignored_terminal_commands(ignore_file: Path, commands: set[str]) -> Non
     payload = {
         "commands": sorted(commands),
     }
-    ignore_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    ignore_file.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 def filter_ignored_entries(
@@ -2136,20 +2381,26 @@ def print_terminal_history(
         if loop:
             print("Mode                : boucle, Entrée pour quitter")
         if undated_matches:
-            print("Note                : les lignes sans date n'ont pas été horodatées par zsh.")
+            print(
+                "Note                : les lignes sans date n'ont pas été horodatées par zsh."
+            )
         print()
 
         if show_top:
             print("Commandes fréquentes")
             print("--------------------")
-            for command, count in most_common_entries(matches, min(10, recent if recent > 0 else 10)):
+            for command, count in most_common_entries(
+                matches, min(10, recent if recent > 0 else 10)
+            ):
                 print(f"{count:>4}  {command}")
             print()
 
         if show_projects:
             print("Projets détectés")
             print("----------------")
-            for label, count in Counter(entry.project for entry in display_matches).most_common(10):
+            for label, count in Counter(
+                entry.project for entry in display_matches
+            ).most_common(10):
                 print(f"{count:>4}  {label}")
             print()
 
@@ -2211,7 +2462,9 @@ def rerun_terminal_history_command(
     if run_number is None:
         print()
         try:
-            choice = input("Numéro à relancer, 0N pour masquer (Entrée pour quitter) : ").strip()
+            choice = input(
+                "Numéro à relancer, 0N pour masquer (Entrée pour quitter) : "
+            ).strip()
         except EOFError:
             print("Annulé.")
             return "cancelled"
@@ -2244,7 +2497,11 @@ def rerun_terminal_history_command(
     print(entry.command)
     if not assume_yes:
         try:
-            confirmation = input("Relancer cette commande ? taper oui pour confirmer : ").strip().lower()
+            confirmation = (
+                input("Relancer cette commande ? taper oui pour confirmer : ")
+                .strip()
+                .lower()
+            )
         except EOFError:
             print("Annulé.")
             return "cancelled"
@@ -2297,33 +2554,53 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("count-notes", help="Compte les notes Markdown sans lire leur contenu")
+    sub.add_parser(
+        "count-notes", help="Compte les notes Markdown sans lire leur contenu"
+    )
 
     sub.add_parser("summary", help="Affiche un résumé du vault")
 
     report = sub.add_parser("report", help="Génère un rapport JSON complet")
-    report.add_argument("--output", type=Path, default=Path("obsidian_media_report.json"))
+    report.add_argument(
+        "--output", type=Path, default=Path("obsidian_media_report.json")
+    )
 
     orphans = sub.add_parser("orphans", help="Liste les médias orphelins")
     orphans.add_argument("--limit", type=int, default=200)
 
-    missing = sub.add_parser("missing", help="Liste les références de médias manquantes")
+    missing = sub.add_parser(
+        "missing", help="Liste les références de médias manquantes"
+    )
     missing.add_argument("--limit", type=int, default=200)
 
-    diagnosis = sub.add_parser("diagnose", help="Diagnostique les médias orphelins et références manquantes")
-    diagnosis.add_argument("--limit", type=int, default=50, help="Nombre d'exemples à afficher")
+    diagnosis = sub.add_parser(
+        "diagnose", help="Diagnostique les médias orphelins et références manquantes"
+    )
+    diagnosis.add_argument(
+        "--limit", type=int, default=50, help="Nombre d'exemples à afficher"
+    )
     diagnosis.add_argument("--output", type=Path, help="Écrit aussi un diagnostic JSON")
 
-    markdown_reports = sub.add_parser("markdown-reports", help="Génère des rapports Markdown lisibles")
+    markdown_reports = sub.add_parser(
+        "markdown-reports", help="Génère des rapports Markdown lisibles"
+    )
     markdown_reports.add_argument(
         "--output-dir",
         type=Path,
         default=Path("diagnostics"),
         help="Dossier de sortie des rapports Markdown",
     )
-    markdown_reports.add_argument("--limit", type=int, default=100, help="Nombre d'éléments dans le rapport prioritaire")
+    markdown_reports.add_argument(
+        "--limit",
+        type=int,
+        default=100,
+        help="Nombre d'éléments dans le rapport prioritaire",
+    )
 
-    exportable = sub.add_parser("exportable-notes", help="Liste les notes exportables sans références média bloquantes")
+    exportable = sub.add_parser(
+        "exportable-notes",
+        help="Liste les notes exportables sans références média bloquantes",
+    )
     exportable.add_argument(
         "--output",
         type=Path,
@@ -2336,7 +2613,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Limite le nombre de lignes par section. Par défaut : aucune limite.",
     )
 
-    blocked = sub.add_parser("blocked-notes", help="Liste les notes non exportables à corriger ou jeter")
+    blocked = sub.add_parser(
+        "blocked-notes", help="Liste les notes non exportables à corriger ou jeter"
+    )
     blocked.add_argument(
         "--output",
         type=Path,
@@ -2344,7 +2623,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fichier Markdown de sortie",
     )
 
-    export = sub.add_parser("export-note", help="Exporte une note avec ses médias attachés")
+    export = sub.add_parser(
+        "export-note", help="Exporte une note avec ses médias attachés"
+    )
     export.add_argument("note", help="Chemin ou nom de la note à exporter")
     export.add_argument(
         "--output",
@@ -2369,15 +2650,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Remplace les notes et médias déjà présents dans le dossier de sortie",
     )
 
-    export_folder = sub.add_parser("export-folder", help="Exporte les notes valides d'un dossier du vault")
-    export_folder.add_argument("folder", help="Dossier du vault à exporter, par exemple Cartes_postales_photo")
+    export_folder = sub.add_parser(
+        "export-folder", help="Exporte les notes valides d'un dossier du vault"
+    )
+    export_folder.add_argument(
+        "folder", help="Dossier du vault à exporter, par exemple Cartes_postales_photo"
+    )
     export_folder.add_argument(
         "--output",
         type=Path,
         default=default_export_output,
         help=f"Dossier de sortie. Défaut : ${ENV_EXPORT_OUTPUT_DIR}",
     )
-    export_folder.add_argument("--dry-run", action="store_true", help="Simule sans copier")
+    export_folder.add_argument(
+        "--dry-run", action="store_true", help="Simule sans copier"
+    )
     export_folder.add_argument(
         "--rewrite-links",
         action="store_true",
@@ -2556,7 +2843,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if default_vault is not None:
             raw_argv.insert(0, default_vault.as_posix())
         elif "-h" not in raw_argv and "--help" not in raw_argv:
-            parser.error(f"vault manquant : fournissez un chemin ou renseignez {ENV_VAULT_PATH} dans .env")
+            parser.error(
+                f"vault manquant : fournissez un chemin ou renseignez {ENV_VAULT_PATH} dans .env"
+            )
 
     args = parser.parse_args(raw_argv)
 
@@ -2594,7 +2883,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.vault is None:
-        parser.error(f"vault manquant : fournissez un chemin ou renseignez {ENV_VAULT_PATH} dans .env")
+        parser.error(
+            f"vault manquant : fournissez un chemin ou renseignez {ENV_VAULT_PATH} dans .env"
+        )
 
     vault = args.vault.expanduser().resolve()
     if not vault.exists() or not vault.is_dir():
@@ -2643,7 +2934,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "export-note":
         if args.output is None:
-            parser.error(f"--output manquant : fournissez un dossier ou renseignez {ENV_EXPORT_OUTPUT_DIR} dans .env")
+            parser.error(
+                f"--output manquant : fournissez un dossier ou renseignez {ENV_EXPORT_OUTPUT_DIR} dans .env"
+            )
         export_note_with_media(
             index,
             args.note,
@@ -2657,7 +2950,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "export-folder":
         if args.output is None:
-            parser.error(f"--output manquant : fournissez un dossier ou renseignez {ENV_EXPORT_OUTPUT_DIR} dans .env")
+            parser.error(
+                f"--output manquant : fournissez un dossier ou renseignez {ENV_EXPORT_OUTPUT_DIR} dans .env"
+            )
         export_folder_notes(
             index,
             args.folder,
