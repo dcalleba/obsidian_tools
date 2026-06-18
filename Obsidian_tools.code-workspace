@@ -1,0 +1,27 @@
+{
+  "folders": [
+    {
+      "name": "Obsidian_tools",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "codex.workingDirectory": "${workspaceFolder:Obsidian_tools}",
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/.ruff_cache": true,
+      "**/*.egg-info": true
+    },
+    "search.exclude": {
+      "**/.venv": true,
+      "**/__pycache__": true,
+      "**/*.egg-info": true,
+      "**/diagnostics": true,
+      "**/exports": true,
+      "**/obsidian_media_report*.json": true,
+      "**/obsidian_media_diagnosis*.json": true
+    }
+  }
+}
