@@ -5,11 +5,12 @@
 
 100|Lazygit|lazygit|GIT - Lazygit|GIT
 
-200|Tmux reload|tmux source-file ~/.tmux.conf|TM - Reload tmux|TMUX
-210|Tmux kill session|tmux kill-session -t Obsidian|TM - Kill session|TMUX
+200|Tmux edit commands.txt|zed commands.txt|TM - Load Commands|TMUX
+210|Tmux reload|tmux source-file ~/.tmux.conf|TM - Reload tmux|TMUX
+220|Tmux kill session|tmux kill-session -t Obsidian|TM - Kill session|TMUX
 
 300|Python version|python --version|PY - Python version|SYSTEM
 310|UV version|uv --version|PY - UV|SYSTEM
 
 400|Edit .zshrc|zed ~/.zshrc|ZH - zshrc|ZSHRC
-410|Source .zshrc|source ~/.zshrc|ZH - zshrc|ZSHRC
+410|Reload zsh|RELOAD_ZSH|ZH - zshrc2|ZSHRC

@@ -82,6 +82,19 @@ EOF
     fi
 
     clear
+
+    if [ "$cmd" = "RELOAD_ZSH" ]; then
+        echo "▶ Rechargement de ~/.zshrc"
+        echo
+
+        source "$HOME/.zshrc"
+
+        echo ".zshrc rechargé"
+        echo
+        read "?Entrée..."
+        continue
+    fi
+
     echo "▶ $cmd"
     echo
 
