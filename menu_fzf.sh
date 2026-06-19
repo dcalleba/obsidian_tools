@@ -18,7 +18,7 @@ do
     echo "===== $CAT ====="
     echo
 
-    read direct
+    # read direct
 
     if [ -n "$direct" ]; then
         line=$(grep "^$direct|" "$FILE")
