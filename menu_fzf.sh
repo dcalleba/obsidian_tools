@@ -18,44 +18,39 @@ do
     echo "===== $CAT ====="
     echo
 
-    # read direct
+    sel=$(
+        awk -F'|' -v cat="$CAT" '$5==cat {print $1 "|" $2 "|" $3 "|" $4}' "$FILE" |
+        fzf \
+            --no-sort \
+            --layout=reverse \
+            --delimiter='|' \
+            --with-nth=1,2 \
+            --preview='
+                note=$(echo {} | cut -d"|" -f4 | sed "s/^ *//;s/ *$//")
+                file="'"$DOC_DIR"'/${note}.md"
 
-    if [ -n "$direct" ]; then
-        line=$(grep "^$direct|" "$FILE")
+                if [ -f "$file" ]; then
+                    bat --style=plain --color=always "$file"
+                else
+                    echo "Aide introuvable"
+                    echo
+                    echo "$file"
+                    echo
+                    echo "Alt-E : créer / éditer cette aide"
+                fi
+            ' \
+            --preview-window=right:60%:wrap \
+            --bind='alt-e:execute(
+                mkdir -p "'"$DOC_DIR"'"
+                note=$(echo {4} | sed "s/^ *//;s/ *$//")
+                zed "'"$DOC_DIR"'/${note}.md"
+            )'
+    )
 
-        if [ -z "$line" ]; then
-            echo "Commande inconnue : $direct"
-            read "?Entrée..."
-            continue
-        fi
-    else
-        sel=$(
-            awk -F'|' -v cat="$CAT" '$5==cat {print $1 "|" $2 "|" $4}' "$FILE" |
-            fzf \
-                --no-sort \
-                --layout=reverse \
-                --delimiter='|' \
-                --with-nth=1,2 \
-                --preview='
-                    note=$(echo {} | cut -d"|" -f3 | sed "s/^ *//;s/ *$//")
-                    file="'"$DOC_DIR"'/${note}.md"
+    [ -z "$sel" ] && break
 
-                    if [ -f "$file" ]; then
-                        bat --style=plain --color=always "$file"
-                    else
-                        echo "Aide introuvable"
-                        echo
-                        echo "$file"
-                    fi
-                ' \
-                --preview-window=right:60%:wrap
-        )
-
-        [ -z "$sel" ] && break
-
-        num=$(echo "$sel" | cut -d'|' -f1 | xargs)
-        line=$(grep "^$num|" "$FILE")
-    fi
+    num=$(echo "$sel" | cut -d'|' -f1 | xargs)
+    line=$(grep "^$num|" "$FILE")
 
     description=$(echo "$line" | cut -d'|' -f2)
     cmd=$(echo "$line" | cut -d'|' -f3)
