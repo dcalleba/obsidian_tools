@@ -1,0 +1,15 @@
+10|Ty check|uv run ty check .|PY - Ty check|PYTHON
+20|Ruff check|uv run ruff check --fix .|PY - Ruff|PYTHON
+30|Ruff format|uv run ruff format .|PY - Ruff|PYTHON
+40|Pytest|uv run pytest -f|PY - Pytest|PYTHON
+
+100|Lazygit|lazygit|GIT - Lazygit|GIT
+
+200|Tmux reload|tmux source-file ~/.tmux.conf|TM - Reload tmux|TMUX
+210|Tmux kill session|tmux kill-session -t Obsidian|TM - Kill session|TMUX
+
+300|Python version|python --version|PY - Python version|SYSTEM
+310|UV version|uv --version|PY - UV|SYSTEM
+
+400|Edit .zshrc|zed ~/.zshrc|ZH - zshrc|ZSHRC
+410|Source .zshrc|source ~/.zshrc|ZH - zshrc|ZSHRC
