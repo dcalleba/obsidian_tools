@@ -8,3 +8,7 @@ bat pyproject.toml
 bat README.md
 uv tree
 uv pip list
+git branch -vv
+git branch --unset-upstream
+git branch --set-upstream-to=origin/main main
+open -na Ghostty --args -e "zsh -lc '~/Pythons/Obsidian_tools/start.sh'"
