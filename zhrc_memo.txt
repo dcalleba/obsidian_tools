@@ -1,0 +1,6 @@
+===== ZHRC =====
+10|zed zhrc_memo.txt
+20|zed ~/.zshrc
+source ~/.zshrc
+zed ~/Desktop/Obsidian.command
+30|bash start.sh

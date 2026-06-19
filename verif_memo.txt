@@ -1,4 +1,5 @@
 ===== VERIF =====
+10|zed verif_memo.txt
 ===== SYSTEM =====
 python --version
 uv --version

@@ -1,0 +1,10 @@
+===== PROJECT =====
+10|zed project_memo.txt
+20|gmcl
+tree -L 2
+pwd
+ls -la
+bat pyproject.toml
+bat README.md
+uv tree
+uv pip list

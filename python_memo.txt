@@ -1,4 +1,5 @@
-===== PRODUCTION =====
+===== PYTHON =====
+10|zed python_memo.txt
 uv run obsidian_comment_tool.py --dry-run
 uv run obsidian_comment_tool.py "/Users/danielcallebaut/OBSI_COCKPIT" --dry-run
 uv run obsidian_comment_tool.py "/Users/danielcallebaut/OBSI_COCKPIT"
